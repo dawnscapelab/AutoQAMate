@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 const { ipcRenderer } = window.require('electron');
 
 function WebPage() {
     const [searchKeyword, setSearchKeyword] = useState('삼쩜삼');
     const [timeRange, setTimeRange] = useState('w');
     const [executionStatus, setExecutionStatus] = useState('');
+    const [csvFiles, setCsvFiles] = useState([]);
+
+    useEffect(() => {
+        loadCsvFiles();
+    }, []);
+
+    const loadCsvFiles = async () => {
+        const files = await ipcRenderer.invoke('get-csv-files');
+        setCsvFiles(files);
+    };
 
     const handleExecute = async (e) => {
         e.preventDefault();
@@ -12,8 +22,22 @@ function WebPage() {
         try {
             const result = await ipcRenderer.invoke('execute-web-automation', searchKeyword, timeRange);
             setExecutionStatus(result.message);
+            loadCsvFiles();
         } catch (error) {
             setExecutionStatus(`Error: ${error.message}`);
+        }
+    };
+
+    const handleDownload = async (filePath) => {
+        try {
+            const result = await ipcRenderer.invoke('download-csv', filePath);
+            if (result.success) {
+                alert('File downloaded successfully');
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert(`Error downloading file: ${error.message}`);
         }
     };
 
@@ -86,6 +110,26 @@ function WebPage() {
                     {executionStatus}
                 </div>
             )}
+            <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">CSV Files</h3>
+                {csvFiles.length > 0 ? (
+                    <ul className="divide-y divide-gray-200">
+                        {csvFiles.map((file, index) => (
+                            <li key={index} className="py-4 flex justify-between items-center">
+                                <span className="text-sm font-medium text-gray-900">{file.name}</span>
+                                <button
+                                    onClick={() => handleDownload(file.path)}
+                                    className="ml-4 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    Download
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-sm text-gray-500">No CSV files available.</p>
+                )}
+            </div>
         </div>
     );
 }
