@@ -1,0 +1,278 @@
+{
+  "name": "Google Calendar Test",
+  "steps": [
+    {
+      "id": "df804fce-2b0f-4d37-a2cc-c1f52b76bf34",
+      "name": "Close App",
+      "command": "terminate_app",
+      "params": {
+        "package": "com.google.android.calendar"
+      }
+    },
+    {
+      "id": "1",
+      "name": "Launch Calendar1",
+      "command": "launch_app",
+      "params": {
+        "package": "com.google.android.calendar"
+      }
+    },
+    {
+      "id": "2",
+      "name": "Click New Event1",
+      "command": "click",
+      "params": {
+        "xpath": "//*[@resource-id=\"com.google.android.calendar:id/floating_action_button\"]",
+        "ignoreIfNotFound": false
+      }
+    },
+    {
+      "id": "021458ff-8e93-48d9-9f13-d30754962938",
+      "name": "Click schedule button",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[@content-desc=\"일정 버튼\"]",
+        "ignoreIfNotFound": false
+      }
+    },
+    {
+      "id": "319755fc-c087-4c93-b3cb-9ff2ee2c7b37",
+      "name": "Click start date",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[starts-with(@content-desc, \"시작일\")]",
+        "ignoreIfNotFound": false
+      }
+    },
+    {
+      "id": "f93fb3be-b65c-480a-af92-bd1b588e0d6f",
+      "name": "Change input mode",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.ImageButton[@resource-id=\"com.google.android.calendar:id/mtrl_picker_header_toggle\"]",
+        "ignoreIfNotFound": false
+      }
+    },
+    {
+      "id": "03fa74dd-b2cd-4e5a-ad4c-41fa9759cc5c",
+      "name": "Input date",
+      "command": "input_text",
+      "params": {
+        "xpath": "//android.widget.EditText[@hint=\"날짜\"]",
+        "text": "2024/11/11"
+      }
+    },
+    {
+      "id": "6d158941-5686-453d-8735-d8dc6293fa1f",
+      "name": "Click confirm button",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.Button[@resource-id=\"com.google.android.calendar:id/confirm_button\"]"
+      }
+    },
+    {
+      "id": "c2dab55c-4ee7-4b93-95f6-c5a6d1c490ee",
+      "name": "Click start time",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[starts-with(@content-desc, \"시작 시간\")]"
+      }
+    },
+    {
+      "id": "cacc8084-8749-4810-af60-51ded4f89442",
+      "name": "Click start hour",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[@content-desc=\"9시간\"]"
+      }
+    },
+    {
+      "id": "92efb6a4-9d76-4d50-83f9-50a9535acacb",
+      "name": "Click minute",
+      "command": "click",
+      "params": {
+        "xpath": "//android.view.View[@resource-id=\"com.google.android.calendar:id/material_minute_tv\"]",
+        "ignoreIfNotFound": false
+      }
+    },
+    {
+      "id": "69c3faaf-77ab-4bdd-93c6-9955f240c861",
+      "name": "Click start minute",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[@content-desc=\"00분\"]"
+      }
+    },
+    {
+      "id": "503c3fcf-8aba-49ce-8515-594f254b5ca7",
+      "name": "Click confirm button",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.Button[@resource-id=\"com.google.android.calendar:id/material_timepicker_ok_button\"]"
+      }
+    },
+    {
+      "id": "fd29d189-5e5f-4797-9f4e-58c80f6e8b0a",
+      "name": "Click end time",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[starts-with(@content-desc, \"종료 시간\")]"
+      }
+    },
+    {
+      "id": "a7d45b2c-ae00-418b-a781-6be263e827fa",
+      "name": "Click end hour",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[@content-desc=\"17시간\"]"
+      }
+    },
+    {
+      "id": "151897db-8f3d-4ac0-9f49-0b1c167094f0",
+      "name": "Click minute",
+      "command": "click",
+      "params": {
+        "xpath": "//android.view.View[@resource-id=\"com.google.android.calendar:id/material_minute_tv\"]"
+      }
+    },
+    {
+      "id": "f358ab7b-31cb-4251-991f-b05eafb9de84",
+      "name": "Click end minute",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[@content-desc=\"00분\"]"
+      }
+    },
+    {
+      "id": "225a9bde-4ccb-482a-812e-fec46d38e1bc",
+      "name": "Click confirm button",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.Button[@resource-id=\"com.google.android.calendar:id/material_timepicker_ok_button\"]"
+      }
+    },
+    {
+      "id": "6b8c1da4-e513-470c-be1e-552ecfd0988a",
+      "name": "Input Title",
+      "command": "input_text",
+      "params": {
+        "xpath": "//android.widget.EditText[@resource-id=\"com.google.android.calendar:id/title\"]",
+        "text": "빼빼로 데이"
+      }
+    },
+    {
+      "id": "baafb336-bbbb-4787-8965-1c5c32252d9f",
+      "name": "Click save button",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.Button[@resource-id=\"com.google.android.calendar:id/save\"]"
+      }
+    },
+    {
+      "id": "0cf7e717-5f9d-4bde-bc8a-0a7924ecefab",
+      "name": "Click settings button",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.ImageButton[@content-desc=\"캘린더 목록 및 설정 창 표시\"]"
+      }
+    },
+    {
+      "id": "864ce2f9-8751-4987-98c7-ab413d2c5bbe",
+      "name": "Click weekly type",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[starts-with(@content-desc, \"주간 일정 보기\")]"
+      }
+    },
+    {
+      "id": "7bcd87da-c43e-4efe-a22c-c112dca0c9cc",
+      "name": "Click date picker",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[@resource-id=\"com.google.android.calendar:id/date_picker_text_view\"]"
+      }
+    },
+    {
+      "id": "d8df9873-195e-40d9-aee5-648b7bc78159",
+      "name": "Click month",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.Button[@content-desc=\"11월\" and @resource-id=\"com.google.android.calendar:id/month_chip\"]"
+      }
+    },
+    {
+      "id": "c9099889-af80-4429-b454-5be089655cfd",
+      "name": "Click day",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.FrameLayout[@resource-id=\"com.google.android.calendar:id/timely_date_picker_container\"]/android.widget.FrameLayout/androidx.viewpager.widget.ViewPager/android.view.View/android.view.View[10]",
+        "ignoreIfNotFound": false
+      }
+    },
+    {
+      "id": "2ee58058-361d-40ec-83ae-abb277042212",
+      "name": "Click date picker",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[@resource-id=\"com.google.android.calendar:id/date_picker_text_view\"]"
+      }
+    },
+    {
+      "id": "d00de17f-16a4-4bd4-8327-07eb53d44d0f",
+      "name": "Scroll to event",
+      "command": "scroll_to",
+      "params": {
+        "xpath": "//android.view.View[starts-with(@content-desc, \"빼빼로 데이\")]"
+      }
+    },
+    {
+      "id": "a6a4e634-5e45-4b4c-8394-74702b64c008",
+      "name": "Drag event",
+      "command": "drag_and_drop",
+      "params": {
+        "sourceXpath": "//android.view.View[starts-with(@content-desc, \"빼빼로 데이\")]",
+        "targetXpath": "//android.view.View[@content-desc=\"수요일 13 11월 2024, 10월13, 일별 일정 보기 열기\"]"
+      }
+    },
+    {
+      "id": "a5c2d9ff-0cb6-4c40-af95-5bc5a6cbc40f",
+      "name": "wait",
+      "command": "wait",
+      "params": {
+        "duration": 5000
+      }
+    },
+    {
+      "id": "93806b2b-d17a-41fe-9013-6455c4ec7593",
+      "name": "Click event",
+      "command": "click",
+      "params": {
+        "xpath": "//android.view.View[starts-with(@content-desc, \"빼빼로 데이\")]"
+      }
+    },
+    {
+      "id": "c4973eb4-f054-4b1d-b491-a4cc84b5521c",
+      "name": "Click option",
+      "command": "click",
+      "params": {
+        "xpath": "//android.view.ViewGroup[@resource-id=\"com.google.android.calendar:id/info_action_overflow\"]//android.widget.ImageView"
+      }
+    },
+    {
+      "id": "fd850b9e-ae95-4bee-b6e1-031062dab5c0",
+      "name": "Click delete",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.TextView[@text=\"삭제\"]"
+      }
+    },
+    {
+      "id": "215e71b7-41bb-4adf-8216-2d29b8596f8e",
+      "name": "Click delete confirm button",
+      "command": "click",
+      "params": {
+        "xpath": "//android.widget.Button[@resource-id=\"android:id/button1\"]"
+      }
+    }
+  ]
+}

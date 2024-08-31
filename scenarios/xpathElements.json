@@ -1,0 +1,8 @@
+{
+  "calendarNewEventButton": "//*[@resource-id=\"com.google.android.calendar:id/floating_action_button\"]",
+  "calendarScheduleButton": "//android.widget.TextView[@content-desc=\"일정 버튼\"]",
+  "calendarStartDate": "//android.widget.TextView[starts-with(@content-desc, \"시작일\")]",
+  "calendarInputModeToggle": "//android.widget.ImageButton[@resource-id=\"com.google.android.calendar:id/mtrl_picker_header_toggle\"]",
+  "calendarTimePickerMInute": "//android.view.View[@resource-id=\"com.google.android.calendar:id/material_minute_tv\"]",
+  "timePickerConfirmButton": "//android.widget.Button[@resource-id=\"com.google.android.calendar:id/material_timepicker_ok_button\"]"
+}

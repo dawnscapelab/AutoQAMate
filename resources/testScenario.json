@@ -1,0 +1,42 @@
+{
+  "name": "Google Search Test",
+  "steps": [
+    {
+      "name": "Launch Chrome",
+      "command": "launch_app",
+      "params": {
+        "package": "com.android.chrome",
+        "activity": "com.google.android.apps.chrome.Main"
+      }
+    },
+    {
+      "name": "Navigate to Google",
+      "command": "navigate",
+      "params": {
+        "url": "https://www.google.com"
+      }
+    },
+    {
+      "name": "Enter search query",
+      "command": "input_text",
+      "params": {
+        "selector": "//input[@name=\"q\"]",
+        "text": "Appium test"
+      }
+    },
+    {
+      "name": "Click search button",
+      "command": "click",
+      "params": {
+        "selector": "//button[@aria-label=\"Google Search\"]"
+      }
+    },
+    {
+      "name": "Wait",
+      "command": "wait",
+      "params": {
+        "duration": 5000
+      }
+    }
+  ]
+}
