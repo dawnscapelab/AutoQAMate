@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const url = require('url');
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -18,20 +19,24 @@ function createWindow() {
         win.loadURL('http://localhost:8080');
         win.webContents.openDevTools();
     } else {
-        win.loadFile(path.join(__dirname, './dist/index.html'));
+        win.loadURL(url.format({
+            pathname: path.join(__dirname, './dist/index.html'),
+            protocol: 'file:',
+            slashes: true
+        }));
     }
 }
 
-app.whenReady().then(() => {
-    createWindow();
-
-    app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow();
-    });
-});
+app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
+    }
+});
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
     }
 });
