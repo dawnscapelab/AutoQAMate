@@ -41,6 +41,11 @@ function MobilePage() {
         }
     };
 
+    const loadXpathElements = async () => {
+        const elements = await ipcRenderer.invoke('get-xpath-elements');
+        setXpathElements(elements);
+    };
+
     const handleDeviceSelect = (device) => {
         setSelectedDevice(device);
     };
@@ -74,6 +79,60 @@ function MobilePage() {
             newSteps[index] = { ...newSteps[index], [field]: value };
         }
         setTestScenario({ ...testScenario, steps: newSteps });
+    };
+
+    const handleAddStep = () => {
+        setTestScenario({
+            ...testScenario,
+            steps: [...testScenario.steps, { id: uuidv4(), name: '', command: '', params: {} }]
+        });
+    };
+
+    const handleRemoveStep = (index) => {
+        const newSteps = testScenario.steps.filter((_, i) => i !== index);
+        setTestScenario({ ...testScenario, steps: newSteps });
+    };
+
+    const handleSaveScenario = async () => {
+        try {
+            await ipcRenderer.invoke('save-test-scenario', testScenario);
+            setTestStatus('Test scenario saved successfully');
+        } catch (error) {
+            setTestStatus(`Error saving test scenario: ${error.message}`);
+        }
+    };
+
+    const handleGetPageSource = async () => {
+        if (!selectedDevice) {
+            setTestStatus('Please select a device first');
+            return;
+        }
+
+        try {
+            const result = await ipcRenderer.invoke('get-page-source', selectedDevice);
+            if (result.success) {
+                setPageSource(result.pageSource);
+                setShowPageSourceModal(true);
+            } else {
+                setTestStatus(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            setTestStatus(`Error: ${error.message}`);
+        }
+    };
+
+    const handleAddXPath = async () => {
+        if (newXPathName && newXPathValue) {
+            const updatedElements = await ipcRenderer.invoke('add-xpath-element', newXPathName, newXPathValue);
+            setXpathElements(updatedElements);
+            setNewXPathName('');
+            setNewXPathValue('');
+        }
+    };
+
+    const handleRemoveXPath = async (name) => {
+        const updatedElements = await ipcRenderer.invoke('remove-xpath-element', name);
+        setXpathElements(updatedElements);
     };
 
     const renderStepParams = (step, index) => {
@@ -242,170 +301,63 @@ function MobilePage() {
                         className="w-full px-3 py-2 border rounded mb-2"
                     />
                 );
-            case 'remove_app_from_recents':
-                return (
-                    <input
-                        type="text"
-                        value={step.params.package || ''}
-                        onChange={(e) => handleStepChange(index, 'params', { package: e.target.value })}
-                        placeholder="Package name"
-                        className="w-full px-3 py-2 border rounded mb-2"
-                    />
-                );
             default:
                 return null;
         }
     };
 
-    const handleAddStep = () => {
-        setTestScenario({
-            ...testScenario,
-            steps: [...testScenario.steps, { id: uuidv4(), name: '', command: '', params: {} }]
-        });
-    };
-
-    const handleRemoveStep = (index) => {
-        const newSteps = testScenario.steps.filter((_, i) => i !== index);
-        setTestScenario({ ...testScenario, steps: newSteps });
-    };
-
-    const handleSaveScenario = async () => {
-        try {
-            await ipcRenderer.invoke('save-test-scenario', testScenario);
-            setTestStatus('Test scenario saved successfully');
-        } catch (error) {
-            setTestStatus(`Error saving test scenario: ${error.message}`);
-        }
-    };
-
-    const handleGetPageSource = async () => {
-        if (!selectedDevice) {
-            setTestStatus('Please select a device first');
-            return;
-        }
-
-        try {
-            const result = await ipcRenderer.invoke('get-page-source', selectedDevice);
-            if (result.success) {
-                setPageSource(result.pageSource);
-                setShowPageSourceModal(true);
-            } else {
-                setTestStatus(`Error: ${result.message}`);
-            }
-        } catch (error) {
-            setTestStatus(`Error: ${error.message}`);
-        }
-    };
-
-    const loadXpathElements = async () => {
-        const elements = await ipcRenderer.invoke('get-xpath-elements');
-        setXpathElements(elements);
-    };
-
-    const handleAddXPath = async () => {
-        if (newXPathName && newXPathValue) {
-            const updatedElements = await ipcRenderer.invoke('add-xpath-element', newXPathName, newXPathValue);
-            setXpathElements(updatedElements);
-            setNewXPathName('');
-            setNewXPathValue('');
-        }
-    };
-
-    const handleRemoveXPath = async (name) => {
-        const updatedElements = await ipcRenderer.invoke('remove-xpath-element', name);
-        setXpathElements(updatedElements);
-    };
-
-    const renderXPathModal = () => (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                <h3 className="text-lg font-medium leading-6 text-gray-900 mb-2">Manage XPath Elements</h3>
-                <input
-                    type="text"
-                    value={newXPathName}
-                    onChange={(e) => setNewXPathName(e.target.value)}
-                    placeholder="XPath Name"
-                    className="w-full px-3 py-2 border rounded mb-2"
-                />
-                <input
-                    type="text"
-                    value={newXPathValue}
-                    onChange={(e) => setNewXPathValue(e.target.value)}
-                    placeholder="XPath Value"
-                    className="w-full px-3 py-2 border rounded mb-2"
-                />
-                <button
-                    onClick={handleAddXPath}
-                    className="px-4 py-2 bg-blue-500 text-white rounded mr-2"
-                >
-                    Add XPath
-                </button>
-                <div className="mt-4">
-                    <h4 className="font-medium mb-2">Existing XPath Elements:</h4>
-                    <ul>
-                        {xpathElements.map(([name, value]) => (
-                            <li key={name} className="flex justify-between items-center mb-2">
-                                <span title={value}>{name}</span>
-                                <button
-                                    onClick={() => handleRemoveXPath(name)}
-                                    className="px-2 py-1 bg-red-500 text-white rounded"
-                                >
-                                    Remove
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <button
-                    onClick={() => setShowXPathModal(false)}
-                    className="mt-4 px-4 py-2 bg-gray-300 text-black rounded"
-                >
-                    Close
-                </button>
-            </div>
-        </div>
-    );
-
     return (
-        <div>
-            <div className="md:flex md:items-center md:justify-between">
-                <div className="min-w-0 flex-1">
-                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                        Mobile Automation
-                    </h2>
-                </div>
-            </div>
-            <div className="mt-8">
-                <h3 className="text-lg font-semibold mb-4">Connected Devices</h3>
+        <div className="container mx-auto p-4">
+            <h1 className="text-2xl font-bold mb-4">Mobile Automation</h1>
+
+            <div className="bg-white shadow rounded-lg p-6 mb-4">
+                <h2 className="text-xl font-semibold mb-2">Connected Devices</h2>
                 {devices.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
+                    <ul className="space-y-2 mb-4">
                         {devices.map((device, index) => (
                             <li
                                 key={index}
-                                className={`py-4 flex justify-between items-center cursor-pointer ${
-                                    selectedDevice === device ? 'bg-indigo-100' : ''
+                                className={`p-2 rounded cursor-pointer ${
+                                    selectedDevice === device ? 'bg-blue-100' : 'hover:bg-gray-100'
                                 }`}
                                 onClick={() => handleDeviceSelect(device)}
                             >
-                                <span className="text-sm font-medium text-gray-900">{device.name}</span>
+                                {device.name}
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-sm text-gray-500">No devices connected.</p>
+                    <p className="text-gray-500 mb-4">No devices connected.</p>
                 )}
+                <div className="flex space-x-2">
+                    <button
+                        onClick={loadDevices}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Refresh Devices
+                    </button>
+                    <button
+                        onClick={handleGetPageSource}
+                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        disabled={!selectedDevice}
+                    >
+                        Get Page Source
+                    </button>
+                </div>
             </div>
-            <div className="mb-4">
-                <h3 className="text-xl font-semibold mb-2">Test Scenario</h3>
+
+            <div className="bg-white shadow rounded-lg p-6 mb-4">
+                <h2 className="text-xl font-semibold mb-2">Test Scenario</h2>
                 <input
                     type="text"
                     value={testScenario.name}
                     onChange={handleScenarioNameChange}
                     placeholder="Scenario Name"
-                    className="w-full px-3 py-2 border rounded mb-2"
+                    className="w-full px-3 py-2 border rounded mb-4"
                 />
                 {testScenario.steps.map((step, index) => (
-                    <div key={step.id} className="mb-2 p-2 border rounded">
+                    <div key={step.id} className="mb-4 p-4 border rounded">
+                        <h3 className="text-lg font-semibold mb-2">Step {index + 1}</h3>
                         <input
                             type="text"
                             value={step.name}
@@ -430,40 +382,62 @@ function MobilePage() {
                         {renderStepParams(step, index)}
                         <button
                             onClick={() => handleRemoveStep(index)}
-                            className="px-3 py-1 bg-red-500 text-white rounded"
+                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                         >
                             Remove Step
                         </button>
                     </div>
                 ))}
+                <div className="flex justify-between">
+                    <button
+                        onClick={handleAddStep}
+                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                        Add Step
+                    </button>
+                    <button
+                        onClick={handleSaveScenario}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Save Scenario
+                    </button>
+                </div>
+            </div>
+
+            <div className="bg-white shadow rounded-lg p-6 mb-4">
+                <h2 className="text-xl font-semibold mb-2">XPath Management</h2>
                 <button
-                    onClick={handleAddStep}
-                    className="px-4 py-2 bg-green-500 text-white rounded mr-2"
+                    onClick={() => setShowXPathModal(true)}
+                    className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 mb-4"
                 >
-                    Add Step
-                </button>
-                <button
-                    onClick={handleSaveScenario}
-                    className="px-4 py-2 bg-blue-500 text-white rounded"
-                >
-                    Save Scenario
+                    Manage XPath Elements
                 </button>
             </div>
+
             <div className="mt-4">
                 <button
-                    onClick={handleGetPageSource}
-                    className="px-4 py-2 bg-green-500 text-white rounded mr-2"
+                    onClick={handleRunTest}
                     disabled={!selectedDevice}
+                    className={`px-4 py-2 bg-indigo-600 text-white rounded ${
+                        !selectedDevice ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-700'
+                    }`}
                 >
-                    Get Page Source
+                    Run Test
                 </button>
             </div>
+
+            {testStatus && (
+                <div className="mt-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
+                    <p className="font-bold">Test Status</p>
+                    <p>{testStatus}</p>
+                </div>
+            )}
 
             {showPageSourceModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
                     <div className="relative top-20 mx-auto p-5 border w-11/12 shadow-lg rounded-md bg-white">
-                        <div className="mt-3 text-center">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900">Page Source</h3>
+                        <div className="mt-3">
+                            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-2">Page Source</h3>
                             <div className="mt-2 px-7 py-3">
                                 <textarea
                                     className="w-full h-96 px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
@@ -474,7 +448,7 @@ function MobilePage() {
                             <div className="items-center px-4 py-3">
                                 <button
                                     onClick={() => setShowPageSourceModal(false)}
-                                    className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                                 >
                                     Close
                                 </button>
@@ -483,25 +457,54 @@ function MobilePage() {
                     </div>
                 </div>
             )}
-            <div className="mt-4">
-                <button
-                    onClick={() => setShowXPathModal(true)}
-                    className="px-4 py-2 bg-green-500 text-white rounded mr-2"
-                >
-                    Manage XPath Elements
-                </button>
-            </div>
-            {showXPathModal && renderXPathModal()}
-                <button
-                    onClick={handleRunTest}
-                    className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    disabled={!selectedDevice}
-                >
-                    Run Test
-                </button>
-            {testStatus && (
-                <div className="mt-4 text-sm text-gray-500">
-                    {testStatus}
+
+            {showXPathModal && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+                    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-2">Manage XPath Elements</h3>
+                        <input
+                            type="text"
+                            value={newXPathName}
+                            onChange={(e) => setNewXPathName(e.target.value)}
+                            placeholder="XPath Name"
+                            className="w-full px-3 py-2 border rounded mb-2"
+                        />
+                        <input
+                            type="text"
+                            value={newXPathValue}
+                            onChange={(e) => setNewXPathValue(e.target.value)}
+                            placeholder="XPath Value"
+                            className="w-full px-3 py-2 border rounded mb-2"
+                        />
+                        <button
+                            onClick={handleAddXPath}
+                            className="px-4 py-2 bg-blue-500 text-white rounded mr-2"
+                        >
+                            Add XPath
+                        </button>
+                        <div className="mt-4">
+                            <h4 className="font-medium mb-2">Existing XPath Elements:</h4>
+                            <ul>
+                                {xpathElements.map(([name, value]) => (
+                                    <li key={name} className="flex justify-between items-center mb-2">
+                                        <span title={value}>{name}</span>
+                                        <button
+                                            onClick={() => handleRemoveXPath(name)}
+                                            className="px-2 py-1 bg-red-500 text-white rounded"
+                                        >
+                                            Remove
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <button
+                            onClick={() => setShowXPathModal(false)}
+                            className="mt-4 px-4 py-2 bg-gray-300 text-black rounded"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
