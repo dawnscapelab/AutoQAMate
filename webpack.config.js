@@ -21,6 +21,18 @@ module.exports = [{
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader', 'postcss-loader'],
             },
+            {
+                test: /\.svg$/,
+                use: [
+                        {
+                            loader: 'file-loader',
+                            options: {
+                                name: '[name].[ext]',
+                                outputPath: 'images/'
+                            }
+                        }
+                    ],
+            }
         ],
     },
     plugins: [
@@ -43,8 +55,13 @@ module.exports = [{
         hot: true,
         static: {
             directory: path.join(__dirname, 'dist'),
+            publicPath: '/'
         },
         port: 8080,
+        historyApiFallback: true,
+        devMiddleware: {
+            writeToDisk: true
+        }
     },
     },
 ];

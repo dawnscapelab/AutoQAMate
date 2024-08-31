@@ -11,6 +11,7 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false,
         },
+        icon: path.join(__dirname, 'src/assets/icons/icon.ico')
     });
 
     if (isDev) {
