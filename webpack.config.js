@@ -3,10 +3,11 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = [{
-    entry: ['./src/index.js', 'webpack/hot/dev-server'],
+    entry: './src/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
+        publicPath: './'
     },
     module: {
         rules: [
@@ -38,8 +39,11 @@ module.exports = [{
     plugins: [
         new HtmlWebpackPlugin({
             template: './public/index.html',
+            filename: 'index.html'
         }),
-        new webpack.HotModuleReplacementPlugin(),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+        })
     ],
     resolve: {
         extensions: ['.js', '.jsx'],
@@ -50,7 +54,7 @@ module.exports = [{
             "stream": require.resolve("stream-browserify"),
         },
     },
-    target: 'electron-renderer',
+    target: 'web',
     devServer: {
         hot: true,
         static: {
