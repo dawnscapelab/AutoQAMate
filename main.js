@@ -10,6 +10,7 @@ const ADB = require('appium-adb').ADB;
 const { exec } = require('child_process');
 const util = require('util');
 const execAsync = util.promisify(exec);
+const jwt = require('jsonwebtoken');
 
 const isDev = !app.isPackaged;
 
@@ -594,4 +595,46 @@ ipcMain.handle('remove-xpath-element', (event, name) => {
 
 ipcMain.handle('get-xpath-element', (event, name) => {
     return xpathElements[name];
+});
+
+function getTokenFilePath() {
+    if (app.isPackaged) {
+        return path.join(process.resourcesPath, 'resources', 'token.txt');
+    } else {
+        return path.join(__dirname, 'resources', 'token.txt');
+    }
+}
+
+const JWT_SECRET = 'autoqamate';
+
+ipcMain.handle('generate-token', async (event, email) => {
+    try {
+        const tokenFilePath = getTokenFilePath();
+        let tokens = '';
+
+        try {
+            tokens = fs.readFileSync(tokenFilePath, 'utf-8');
+        } catch (error) {
+            if (error.code !== 'ENOENT') {
+                throw error;
+            }
+        }
+
+        const lines = tokens.split('\n').filter(line => line.trim() !== '');
+        const tokenMap = new Map(lines.map(line => line.split(',')));
+
+        const newToken = jwt.sign({ email: email }, JWT_SECRET, { expiresIn: '1h' });
+        tokenMap.set(email, newToken);
+
+        const updatedTokens = Array.from(tokenMap.entries())
+            .map(([email, token]) => `${email},${token}`)
+            .join('\n');
+
+        fs.writeFileSync(tokenFilePath, updatedTokens, 'utf-8');
+
+        return { message: '토큰이 성공적으로 생성되었습니다.' };
+    } catch (error) {
+        console.error('Error generating token:', error);
+        return { message: '토큰 생성 중 오류가 발생했습니다.' };
+    }
 });

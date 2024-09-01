@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter as Router, Route, Routes } from 'react-router-dom';
+import {HashRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
 import Layout from './components/Layout';
 import WebPage from './pages/WebPage';
 import MobilePage from './pages/MobilePage';
@@ -22,18 +22,22 @@ function App() {
                 <Routes>
                     <Route path="/web" element={<WebPage />} />
                     <Route path="/mobile" element={<MobilePage />} />
-                    <Route path="/tools" element={<ToolsPage />} />
+                    <Route path="/tools" element={<ToolsPage />}>
+                        <Route index element={<Navigate to="/tools" replace />} />
+                        <Route path="token" element={<TokenAcquisition />} />
+                        <Route path="tester-info" element={<TesterInfo />}>
+                            <Route path="list" element={<TesterInfoList />} />
+                            <Route path="add" element={<AddTesterInfo />} />
+                            <Route path="delete" element={<DeleteTesterInfo />} />
+                        </Route>
+                        <Route path="test-management" element={<TestManagement />}>
+                            <Route path="list" element={<TestManagementList />} />
+                            <Route path="add" element={<AddTestManagement />} />
+                            <Route path="delete" element={<DeleteTestManagement />} />
+                        </Route>
+                        <Route path="start-test" element={<StartTest />} />
+                    </Route>
                     <Route path="/" element={<WebPage />} />
-                    <Route path="/tools/token" element={<TokenAcquisition />} />
-                    <Route path="/tools/tester-info" element={<TesterInfo />} />
-                    <Route path="/tools/tester-info/list" element={<TesterInfoList />} />
-                    <Route path="/tools/tester-info/add" element={<AddTesterInfo />} />
-                    <Route path="/tools/tester-info/delete" element={<DeleteTesterInfo />} />
-                    <Route path="/tools/test-management" element={<TestManagement />} />
-                    <Route path="/tools/test-management/list" element={<TestManagementList />} />
-                    <Route path="/tools/test-management/add" element={<AddTestManagement />} />
-                    <Route path="/tools/test-management/delete" element={<DeleteTestManagement />} />
-                    <Route path="/tools/start-test" element={<StartTest />} />
                 </Routes>
             </Layout>
         </Router>
