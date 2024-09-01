@@ -115,6 +115,7 @@ function getAdbPath() {
     const adbPath = app.isPackaged
         ? path.join(
             process.resourcesPath,
+            'resources',
             'adb',
             platform === 'win32' ? 'windows' : platform === 'darwin' ? 'mac' : 'linux',
             adbFileName
