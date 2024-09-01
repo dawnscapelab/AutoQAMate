@@ -1,72 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
+const { ipcRenderer } = window.require('electron');
 
 function AddTestManagement() {
+    const [testName, setTestName] = useState('');
+    const [message, setMessage] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const testInfo = {
+                createdAt: new Date().toISOString()
+            };
+            const result = await ipcRenderer.invoke('add-test-info', testName, testInfo);
+            if (result.success) {
+                setMessage('테스트 정보가 성공적으로 저장되었습니다.');
+                setTestName('');
+            } else {
+                setMessage(`오류: ${result.message}`);
+            }
+        } catch (error) {
+            setMessage(`오류: ${error.message}`);
+        }
+    };
+
     return (
-        <form>
+        <form onSubmit={handleSubmit}>
             <div className="space-y-12">
                 <div className="border-b border-gray-900/10 pb-12">
-                    <h2 className="text-base font-semibold leading-7 text-gray-900">테스터 정보 추가</h2>
-                    <p className="mt-1 text-sm leading-6 text-gray-600">테스트 정보를 입력 받고 추가합니다.</p>
-
                     <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                         <div className="col-span-full">
-                            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-                                이메일
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="col-span-full">
-                            <label htmlFor="tester-name"
+                            <label htmlFor="test-name"
                                    className="block text-sm font-medium leading-6 text-gray-900">
-                                이름
+                                테스트 명
                             </label>
                             <div className="mt-2">
                                 <input
-                                    id="tester-name"
-                                    name="tester-name"
+                                    id="test-name"
+                                    name="test-name"
                                     type="text"
-                                    autoComplete="tester-name"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="col-span-full">
-                            <label htmlFor="tester-phone-number"
-                                   className="block text-sm font-medium leading-6 text-gray-900">
-                                핸드폰 번호
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    id="tester-phone-number"
-                                    name="tester-phone-number"
-                                    type="text"
-                                    autoComplete="tester-phone-number"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="col-span-full">
-                            <label htmlFor="tester-birthday"
-                                   className="block text-sm font-medium leading-6 text-gray-900">
-                                생년월일
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    id="tester-birthday"
-                                    name="tester-birthday"
-                                    type="text"
-                                    autoComplete="tester-birthday"
+                                    value={testName}
+                                    onChange={(e) => setTestName(e.target.value)}
+                                    required
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -83,6 +57,11 @@ function AddTestManagement() {
                     Save
                 </button>
             </div>
+            {message && (
+                <div className="mt-4 text-sm text-gray-600">
+                    {message}
+                </div>
+            )}
         </form>
     );
 }

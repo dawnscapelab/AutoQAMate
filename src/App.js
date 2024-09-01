@@ -26,11 +26,13 @@ function App() {
                         <Route index element={<Navigate to="/tools" replace />} />
                         <Route path="token" element={<TokenAcquisition />} />
                         <Route path="tester-info" element={<TesterInfo />}>
+                            <Route index element={<Navigate to="/tools/tester-info" replace />} />
                             <Route path="list" element={<TesterInfoList />} />
                             <Route path="add" element={<AddTesterInfo />} />
                             <Route path="delete" element={<DeleteTesterInfo />} />
                         </Route>
                         <Route path="test-management" element={<TestManagement />}>
+                            <Route index element={<Navigate to="/tools/test-management" replace />} />
                             <Route path="list" element={<TestManagementList />} />
                             <Route path="add" element={<AddTestManagement />} />
                             <Route path="delete" element={<DeleteTestManagement />} />

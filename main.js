@@ -21,6 +21,9 @@ let adb;
 let scenarioFilePath;
 let xpathElements = {};
 let xpathElementsPath;
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
+const accessAsync = util.promisify(fs.access);
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -349,6 +352,32 @@ app.whenReady().then(async () => {
     setupCsvFolder();
     setupScenarioFilePath();
     setupFilePaths();
+    const testerConfPath = getTesterConfPath();
+    try {
+        console.log('Checking if testerconf.json exists');
+        await accessAsync(testerConfPath, fs.constants.F_OK);
+        console.log('testerconf.json exists');
+
+        const initialContent = await readFileAsync(testerConfPath, 'utf-8');
+        console.log('Initial content of testerconf.json:', initialContent);
+
+        if (initialContent.trim() === '' || initialContent === '[]') {
+            console.log('testerconf.json is empty or contains an empty array, initializing with empty object');
+            await writeFileAsync(testerConfPath, JSON.stringify({}, null, 2));
+        }
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            console.log('testerconf.json does not exist, creating new file');
+            try {
+                await writeFileAsync(testerConfPath, JSON.stringify({}, null, 2));
+                console.log('Successfully created testerconf.json');
+            } catch (writeError) {
+                console.error('Error creating testerconf.json:', writeError);
+            }
+        } else {
+            console.error('Error checking testerconf.json:', error);
+        }
+    }
     await initializeADB();
 });
 
@@ -637,4 +666,192 @@ ipcMain.handle('generate-token', async (event, email) => {
         console.error('Error generating token:', error);
         return { message: '토큰 생성 중 오류가 발생했습니다.' };
     }
+});
+
+ipcMain.handle('get-token', async (event, email) => {
+    try {
+        const tokenFilePath = getTokenFilePath();
+        const tokens = fs.readFileSync(tokenFilePath, 'utf-8');
+        const lines = tokens.split('\n');
+        for (const line of lines) {
+            const [storedEmail, token] = line.split(',');
+            if (storedEmail === email) {
+                return { success: true, token };
+            }
+        }
+        return { success: false, message: '토큰을 찾을 수 없습니다.' };
+    } catch (error) {
+        console.error('토큰을 가져오는 중 오류 발생:', error);
+        return { success: false, message: '토큰을 가져오는 데 실패했습니다.' };
+    }
+});
+
+function getTesterConfPath() {
+    const testerConfPath = app.isPackaged
+        ? path.join(process.resourcesPath, 'resources', 'testerconf.json')
+        : path.join(__dirname, 'resources', 'testerconf.json');
+
+    console.log('Tester configuration file path:', testerConfPath);
+    return testerConfPath;
+}
+
+ipcMain.handle('add-tester-info', async (event, testerInfo) => {
+    try {
+        const testerConfPath = getTesterConfPath();
+        let testerData = {};
+
+        console.log('Attempting to read testerconf.json');
+        try {
+            const data = await readFileAsync(testerConfPath, 'utf-8');
+            console.log('Raw file content:', data);
+            if (data.trim() === '') {
+                console.log('File is empty, initializing with empty object');
+                testerData = {};
+            } else {
+                testerData = JSON.parse(data);
+            }
+            console.log('Successfully read testerconf.json');
+            console.log('Current content:', JSON.stringify(testerData));
+        } catch (error) {
+            console.error('Error reading testerconf.json:', error);
+            if (error.code === 'ENOENT') {
+                console.log('testerconf.json does not exist, will create new file');
+            } else {
+                throw error;
+            }
+        }
+
+        console.log('New tester info to be added:', JSON.stringify(testerInfo));
+        testerData[testerInfo.email] = testerInfo;
+        console.log('Updated testerData:', JSON.stringify(testerData));
+
+        console.log('Attempting to write to testerconf.json');
+        const dataToWrite = JSON.stringify(testerData, null, 2);
+        console.log('Data to be written:', dataToWrite);
+        await writeFileAsync(testerConfPath, dataToWrite);
+        console.log('Successfully wrote to testerconf.json');
+
+        const verificationData = await readFileAsync(testerConfPath, 'utf-8');
+        console.log('File content after writing:', verificationData);
+
+        if (Object.keys(JSON.parse(verificationData)).length === 0) {
+            console.error('Warning: File appears to be empty after writing');
+        }
+
+        return { success: true, message: '테스터 정보가 성공적으로 저장되었습니다.' };
+    } catch (error) {
+        console.error('테스터 정보 저장 중 오류 발생:', error);
+        return { success: false, message: error.toString() };
+    }
+});
+
+ipcMain.handle('get-tester-info', async () => {
+    try {
+        const testerConfPath = getTesterConfPath();
+        const data = await readFileAsync(testerConfPath, 'utf-8');
+        const testerData = JSON.parse(data);
+        return { success: true, data: testerData };
+    } catch (error) {
+        console.error('테스터 정보를 읽는 중 오류 발생:', error);
+        return { success: false, message: '테스터 정보를 불러오는 데 실패했습니다.' };
+    }
+});
+
+ipcMain.handle('delete-tester-info', async (event, email) => {
+    try {
+        const testerConfPath = getTesterConfPath();
+        let testerData = {};
+
+        const data = await readFileAsync(testerConfPath, 'utf-8');
+        testerData = JSON.parse(data);
+
+        if (testerData[email]) {
+            delete testerData[email];
+            await writeFileAsync(testerConfPath, JSON.stringify(testerData, null, 2));
+            return { success: true, message: '테스터 정보가 성공적으로 삭제되었습니다.' };
+        } else {
+            return { success: false, message: '해당 이메일의 테스터 정보를 찾을 수 없습니다.' };
+        }
+    } catch (error) {
+        console.error('테스터 정보 삭제 중 오류 발생:', error);
+        return { success: false, message: '테스터 정보 삭제 중 오류가 발생했습니다.' };
+    }
+});
+
+function getTestConfPath() {
+    return app.isPackaged
+        ? path.join(process.resourcesPath, 'resources', 'testconf.json')
+        : path.join(__dirname, 'resources', 'testconf.json');
+}
+
+ipcMain.handle('add-test-info', async (event, testName, testInfo) => {
+    try {
+        const testConfPath = getTestConfPath();
+        let testData = {};
+
+        try {
+            const data = await readFileAsync(testConfPath, 'utf-8');
+            if (data.trim() !== '') {
+                testData = JSON.parse(data);
+            }
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                console.log('testconf.json does not exist, will create new file');
+            } else if (error instanceof SyntaxError) {
+                console.log('Invalid JSON in testconf.json, starting with empty object');
+            } else {
+                throw error;
+            }
+        }
+
+        if (testData[testName]) {
+            return { success: false, message: '이미 존재하는 테스트 이름입니다.' };
+        }
+        testData[testName] = testInfo;
+
+        await writeFileAsync(testConfPath, JSON.stringify(testData, null, 2));
+        console.log('Successfully wrote to testconf.json');
+
+        return { success: true, message: '테스트 정보가 성공적으로 저장되었습니다.' };
+    } catch (error) {
+        console.error('테스트 정보 저장 중 오류 발생:', error);
+        return { success: false, message: error.toString() };
+    }
+});
+
+ipcMain.handle('delete-test-info', async (event, testName) => {
+    try {
+        const testConfPath = getTestConfPath();
+        let testData = {};
+
+        const data = await readFileAsync(testConfPath, 'utf-8');
+        testData = JSON.parse(data);
+
+        if (testData[testName]) {
+            delete testData[testName];
+            await writeFileAsync(testConfPath, JSON.stringify(testData, null, 2));
+            return { success: true, message: '테스트 정보가 성공적으로 삭제되었습니다.' };
+        } else {
+            return { success: false, message: '해당 이름의 테스트 정보를 찾을 수 없습니다.' };
+        }
+    } catch (error) {
+        console.error('테스트 정보 삭제 중 오류 발생:', error);
+        return { success: false, message: '테스트 정보 삭제 중 오류가 발생했습니다.' };
+    }
+});
+
+ipcMain.handle('get-test-info', async () => {
+    try {
+        const testConfPath = getTestConfPath();
+        const data = await readFileAsync(testConfPath, 'utf-8');
+        const testData = JSON.parse(data);
+        return { success: true, data: testData };
+    } catch (error) {
+        console.error('테스트 정보를 읽는 중 오류 발생:', error);
+        return { success: false, message: '테스트 정보를 불러오는 데 실패했습니다.' };
+    }
+});
+
+ipcMain.handle('exit-app', () => {
+    app.quit();
 });

@@ -1,8 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
+const { ipcRenderer } = window.require('electron');
 
 function AddTesterInfo() {
+    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [birthday, setBirthday] = useState('');
+    const [message, setMessage] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const testerInfo = {
+                email,
+                name,
+                phoneNumber,
+                birthday
+            };
+            const result = await ipcRenderer.invoke('add-tester-info', testerInfo);
+            if (result.success) {
+                setMessage('Tester information saved successfully');
+                // Clear the form
+                setEmail('');
+                setName('');
+                setPhoneNumber('');
+                setBirthday('');
+            } else {
+                setMessage(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            setMessage(`Error: ${error.message}`);
+        }
+    };
+
     return (
-        <form>
+        <form onSubmit={handleSubmit}>
             <div className="space-y-12">
                 <div className="border-b border-gray-900/10 pb-12">
                     <h2 className="text-base font-semibold leading-7 text-gray-900">테스터 정보 추가</h2>
@@ -19,6 +51,9 @@ function AddTesterInfo() {
                                     name="email"
                                     type="email"
                                     autoComplete="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -35,6 +70,9 @@ function AddTesterInfo() {
                                     name="tester-name"
                                     type="text"
                                     autoComplete="tester-name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -49,8 +87,11 @@ function AddTesterInfo() {
                                 <input
                                     id="tester-phone-number"
                                     name="tester-phone-number"
-                                    type="text"
-                                    autoComplete="tester-phone-number"
+                                    type="tel"
+                                    autoComplete="tel"
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value)}
+                                    required
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -65,8 +106,10 @@ function AddTesterInfo() {
                                 <input
                                     id="tester-birthday"
                                     name="tester-birthday"
-                                    type="text"
-                                    autoComplete="tester-birthday"
+                                    type="date"
+                                    value={birthday}
+                                    onChange={(e) => setBirthday(e.target.value)}
+                                    required
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -83,6 +126,11 @@ function AddTesterInfo() {
                     Save
                 </button>
             </div>
+            {message && (
+                <div className="mt-4 text-sm text-gray-600">
+                    {message}
+                </div>
+            )}
         </form>
     );
 }

@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
+const { ipcRenderer } = window.require('electron');
 
 function DeleteTesterInfo() {
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const result = await ipcRenderer.invoke('delete-tester-info', email);
+            if (result.success) {
+                setMessage(result.message);
+                setEmail(''); // 입력 필드 초기화
+            } else {
+                setMessage(`오류: ${result.message}`);
+            }
+        } catch (error) {
+            setMessage(`오류: ${error.message}`);
+        }
+    };
+
     return (
-        <form>
+        <form onSubmit={handleSubmit}>
             <div className="space-y-12">
                 <div className="border-b border-gray-900/10 pb-12">
                     <h2 className="text-base font-semibold leading-7 text-gray-900">테스터 정보 삭제</h2>
@@ -19,8 +38,10 @@ function DeleteTesterInfo() {
                                     name="email"
                                     type="email"
                                     autoComplete="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    required={true}
                                 />
                             </div>
                         </div>
@@ -36,6 +57,11 @@ function DeleteTesterInfo() {
                     Delete
                 </button>
             </div>
+            {message && (
+                <div className="mt-4 text-sm text-gray-600">
+                    {message}
+                </div>
+            )}
         </form>
     );
 }

@@ -1,9 +1,10 @@
 import React from 'react';
-import {Link, Outlet, useLocation} from 'react-router-dom';
+import {Link, Outlet, useLocation, useNavigate} from 'react-router-dom';
 import TokenAcquisition from './tools/TokenAcquisition';
 import TesterInfo from './tools/TesterInfo';
 import TestManagement from './tools/TestManagement';
 import StartTest from './tools/StartTest';
+const { ipcRenderer } = window.require('electron');
 
 const secondaryNavigation = [
     { name: '토큰 획득', href: '/tools/token', component: TokenAcquisition },
@@ -47,6 +48,11 @@ function classNames(...classes) {
 
 function ToolsPage() {
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleExit = () => {
+        ipcRenderer.invoke('exit-app');
+    };
 
     return (
         <>
@@ -60,11 +66,12 @@ function ToolsPage() {
                                     key={item.name}
                                     to={item.href}
                                     className={classNames(
-                                        location.pathname === item.href
+                                        (location.pathname === item.href || location.pathname.startsWith(item.href + '/'))
                                             ? 'border-indigo-500 text-indigo-600'
                                             : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                                         'whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium',
                                     )}
+                                    onClick={item.name === '종료' ? handleExit : undefined}
                                 >
                                     {item.name}
                                 </Link>
