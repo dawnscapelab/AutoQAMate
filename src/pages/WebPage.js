@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import { Dialog } from '@headlessui/react'
 const { ipcRenderer } = window.require('electron');
 
 function WebPage() {
@@ -6,6 +7,9 @@ function WebPage() {
     const [timeRange, setTimeRange] = useState('w');
     const [executionStatus, setExecutionStatus] = useState('');
     const [csvFiles, setCsvFiles] = useState([]);
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [csvContent, setCsvContent] = useState('');
+    const [viewerTitle, setViewerTitle] = useState('');
 
     useEffect(() => {
         loadCsvFiles();
@@ -38,6 +42,21 @@ function WebPage() {
             }
         } catch (error) {
             alert(`Error downloading file: ${error.message}`);
+        }
+    };
+
+    const handleView = async (file) => {
+        try {
+            const result = await ipcRenderer.invoke('read-csv', file.path);
+            if (result.success) {
+                setCsvContent(result.content);
+                setViewerTitle(file.name);
+                setIsViewerOpen(true);
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert(`Error viewing file: ${error.message}`);
         }
     };
 
@@ -117,12 +136,20 @@ function WebPage() {
                         {csvFiles.map((file, index) => (
                             <li key={index} className="py-4 flex justify-between items-center">
                                 <span className="text-sm font-medium text-gray-900">{file.name}</span>
-                                <button
-                                    onClick={() => handleDownload(file.path)}
-                                    className="ml-4 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                >
-                                    Download
-                                </button>
+                                <div>
+                                    <button
+                                        onClick={() => handleView(file)}
+                                        className="ml-4 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                    >
+                                        View
+                                    </button>
+                                    <button
+                                        onClick={() => handleDownload(file.path)}
+                                        className="ml-4 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    >
+                                        Download
+                                    </button>
+                                </div>
                             </li>
                         ))}
                     </ul>
@@ -130,6 +157,29 @@ function WebPage() {
                     <p className="text-sm text-gray-500">No CSV files available.</p>
                 )}
             </div>
+
+            <Dialog open={isViewerOpen} onClose={() => setIsViewerOpen(false)} className="relative z-50">
+                <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+                <div className="fixed inset-0 flex items-center justify-center p-4">
+                    <Dialog.Panel className="w-full max-w-3xl rounded bg-white p-6">
+                        <Dialog.Title className="text-lg font-medium leading-6 text-gray-900 mb-4">{viewerTitle}</Dialog.Title>
+                        <div className="mt-2">
+                            <pre className="text-sm text-gray-500 whitespace-pre-wrap break-words h-96 overflow-y-auto">
+                                {csvContent}
+                            </pre>
+                        </div>
+                        <div className="mt-4">
+                            <button
+                                type="button"
+                                className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                onClick={() => setIsViewerOpen(false)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </Dialog.Panel>
+                </div>
+            </Dialog>
         </div>
     );
 }

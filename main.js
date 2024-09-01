@@ -478,6 +478,16 @@ ipcMain.handle('download-csv', async (event, filePath) => {
     return { success: false, message: 'Download cancelled' };
 });
 
+ipcMain.handle('read-csv', async (event, filePath) => {
+    try {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        return { success: true, content };
+    } catch (error) {
+        console.error('Error reading CSV file:', error);
+        return { success: false, message: error.toString() };
+    }
+});
+
 ipcMain.handle('get-connected-devices', async () => {
     return getConnectedDevices();
 });
