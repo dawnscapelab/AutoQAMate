@@ -5,7 +5,8 @@ AutoQAMate는 Electron과 React를 사용하여 구축된 데스크톱 애플리
 ## 사용 방법
 
 1. 프로그램 실행 방법
-   - 프로그램은 로컬 PC에 개발 환경을 설정한 후 실행하거나, release 폴더에 배포된 exe 패키지 파일을 실행하여 사용 가능합니다.
+   - 프로그램은 로컬 PC에 개발 환경을 설정한 후 실행하거나, Release zip 파일들 다운로드 받아서 exe 패키지 파일을 실행하여 사용 가능합니다.
+   - [AutoQAMate v1.0.1](https://github.com/dawnscapelab/autoqamate/releases/download/v1.0.0/autoqamate-v1.0.0.zip)
 
 2. **웹 자동화**
    - "Web" 탭에서 검색 키워드와 시간 범위를 설정합니다.
