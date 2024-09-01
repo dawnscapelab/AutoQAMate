@@ -8,6 +8,7 @@ const secondaryNavigation = [
     { name: '저장된 테스트 정보', href: '/tools/test-management/list', component: TestManagementList },
     { name: '테스트 추가', href: '/tools/test-management/add', component: AddTestManagement },
     { name: '테스트 삭제', href: '/tools/test-management/delete', component: DeleteTestManagement },
+    { name: '뒤로가기', href: '/tools' }
 ]
 
 function classNames(...classes) {
@@ -19,7 +20,6 @@ function TestManagement() {
 
     return (
         <div className="pb-5 sm:pb-0">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">테스트 관리</h3>
             <div className="mt-3 sm:mt-4">
                 <div className="hidden sm:block">
                     <nav className="-mb-px flex space-x-8">

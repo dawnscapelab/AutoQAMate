@@ -3,11 +3,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import logoSrc from '../assets/logo.svg';
+import {ArrowTopRightOnSquareIcon} from "@heroicons/react/16/solid";
+const { ipcRenderer } = window.require('electron');
 
 const navigation = [
     { name: 'Web', href: '/web' },
     { name: 'Mobile', href: '/mobile' },
-    { name: 'Tools', href: '/tools' },
+    { name: 'Tools', href: '/tools', action: 'openTools', icon: ArrowTopRightOnSquareIcon },
 ]
 
 function classNames(...classes) {
@@ -16,6 +18,12 @@ function classNames(...classes) {
 
 function Navbar() {
     const location = useLocation();
+
+    const handleNavClick = (item) => {
+        if (item.action === 'openTools') {
+            ipcRenderer.invoke('open-tools-window');
+        }
+    };
 
     return (
         <Disclosure as="nav" className="border-b border-gray-200 bg-white">
@@ -30,18 +38,34 @@ function Navbar() {
                                 </div>
                                 <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
                                     {navigation.map((item) => (
-                                        <Link
-                                            key={item.name}
-                                            to={item.href}
-                                            className={classNames(
-                                                (location.pathname === item.href || location.pathname.startsWith(item.href + '/'))
-                                                    ? 'border-indigo-500 text-gray-900'
-                                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                                                'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
-                                            )}
-                                        >
-                                            {item.name}
-                                        </Link>
+                                        item.action ? (
+                                            <button
+                                                key={item.name}
+                                                onClick={() => handleNavClick(item)}
+                                                className={classNames(
+                                                    'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                                                    'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
+                                                )}
+                                            >
+                                                {item.name}
+                                                {item.icon && (
+                                                    <item.icon className="ml-1 -mr-0.5 h-4 w-4" aria-hidden="true" />
+                                                )}
+                                            </button>
+                                        ) : (
+                                            <Link
+                                                key={item.name}
+                                                to={item.href}
+                                                className={classNames(
+                                                    (location.pathname === item.href || location.pathname.startsWith(item.href + '/'))
+                                                        ? 'border-indigo-500 text-gray-900'
+                                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                                                    'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
+                                                )}
+                                            >
+                                                {item.name}
+                                            </Link>
+                                        )
                                     ))}
                                 </div>
                             </div>
@@ -63,8 +87,9 @@ function Navbar() {
                             {navigation.map((item) => (
                                 <Disclosure.Button
                                     key={item.name}
-                                    as={Link}
-                                    to={item.href}
+                                    as={item.action ? 'button' : Link}
+                                    to={item.action ? undefined : item.href}
+                                    onClick={item.action ? () => handleNavClick(item) : undefined}
                                     className={classNames(
                                         location.pathname === item.href
                                             ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
@@ -73,6 +98,9 @@ function Navbar() {
                                     )}
                                 >
                                     {item.name}
+                                    {item.icon && (
+                                        <item.icon className="ml-1 -mr-0.5 h-4 w-4" aria-hidden="true" />
+                                    )}
                                 </Disclosure.Button>
                             ))}
                         </div>

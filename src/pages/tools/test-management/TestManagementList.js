@@ -11,10 +11,11 @@ function TestManagementList() {
             try {
                 const result = await ipcRenderer.invoke('get-test-info');
                 if (result.success) {
-                    setTests(Object.entries(result.data).map(([name, info]) => ({
+                    const testArray = Object.entries(result.data).map(([name, info]) => ({
                         name,
                         createdAt: info.createdAt
-                    })));
+                    }));
+                    setTests(testArray);
                 } else {
                     setError(result.message);
                 }
@@ -34,6 +35,10 @@ function TestManagementList() {
 
     if (error) {
         return <p className="text-center py-4 text-red-500">{error}</p>;
+    }
+
+    if (tests.length === 0) {
+        return <p className="text-center py-4 text-gray-500">저장된 테스트 정보가 없습니다.</p>;
     }
 
     return (

@@ -19,8 +19,6 @@ function TokenAcquisition() {
         <form onSubmit={handleSubmit}>
             <div className="space-y-12">
                 <div className="border-b border-gray-900/10 pb-12">
-                    <h2 className="text-base font-semibold leading-7 text-gray-900">토큰 획득</h2>
-                    <p className="mt-1 text-sm leading-6 text-gray-600">이메일을 입력하고 토큰을 획득합니다.</p>
                     <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                         <div className="col-span-full">
                             <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">

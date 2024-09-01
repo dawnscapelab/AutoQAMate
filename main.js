@@ -24,6 +24,7 @@ let xpathElementsPath;
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 const accessAsync = util.promisify(fs.access);
+let toolsWindow = null;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -721,6 +722,10 @@ ipcMain.handle('add-tester-info', async (event, testerInfo) => {
             }
         }
 
+        if (testerData[testerInfo.email]) {
+            return { success: false, error: 'DUPLICATE_EMAIL', message: '이미 등록된 이메일입니다.' };
+        }
+
         console.log('New tester info to be added:', JSON.stringify(testerInfo));
         testerData[testerInfo.email] = testerInfo;
         console.log('Updated testerData:', JSON.stringify(testerData));
@@ -805,7 +810,7 @@ ipcMain.handle('add-test-info', async (event, testName, testInfo) => {
         }
 
         if (testData[testName]) {
-            return { success: false, message: '이미 존재하는 테스트 이름입니다.' };
+            return { success: false, error: 'DUPLICATE_TEST_NAME', message: '이미 존재하는 테스트 이름입니다.' };
         }
         testData[testName] = testInfo;
 
@@ -844,6 +849,9 @@ ipcMain.handle('get-test-info', async () => {
     try {
         const testConfPath = getTestConfPath();
         const data = await readFileAsync(testConfPath, 'utf-8');
+        if (!data.trim()) {
+            return { success: true, data: {} };
+        }
         const testData = JSON.parse(data);
         return { success: true, data: testData };
     } catch (error) {
@@ -854,4 +862,42 @@ ipcMain.handle('get-test-info', async () => {
 
 ipcMain.handle('exit-app', () => {
     app.quit();
+});
+
+function createToolsWindow() {
+    if (toolsWindow) {
+        toolsWindow.focus();
+        return;
+    }
+
+    toolsWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+        },
+        icon: path.join(__dirname, 'src/assets/icons/icon.ico')
+    });
+
+    if (isDev) {
+        toolsWindow.loadURL('http://localhost:8080/#/tools');
+        toolsWindow.webContents.openDevTools();
+    } else {
+        toolsWindow.loadURL(`file://${path.join(__dirname, 'dist', 'index.html')}#/tools`);
+    }
+
+    toolsWindow.on('closed', () => {
+        toolsWindow = null;
+    });
+}
+
+ipcMain.handle('open-tools-window', () => {
+    createToolsWindow();
+});
+
+ipcMain.handle('close-tools-window', () => {
+    if (toolsWindow) {
+        toolsWindow.close();
+    }
 });

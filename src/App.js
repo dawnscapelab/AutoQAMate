@@ -18,10 +18,11 @@ import StartTest from "./pages/tools/StartTest";
 function App() {
     return (
         <Router>
-            <Layout>
+
                 <Routes>
-                    <Route path="/web" element={<WebPage />} />
-                    <Route path="/mobile" element={<MobilePage />} />
+                    <Route path="/" element={<Layout><WebPage /></Layout>} />
+                    <Route path="/web" element={<Layout><WebPage /></Layout>} />
+                    <Route path="/mobile" element={<Layout><MobilePage /></Layout>} />
                     <Route path="/tools" element={<ToolsPage />}>
                         <Route index element={<Navigate to="/tools" replace />} />
                         <Route path="token" element={<TokenAcquisition />} />
@@ -39,9 +40,8 @@ function App() {
                         </Route>
                         <Route path="start-test" element={<StartTest />} />
                     </Route>
-                    <Route path="/" element={<WebPage />} />
                 </Routes>
-            </Layout>
+
         </Router>
     );
 }

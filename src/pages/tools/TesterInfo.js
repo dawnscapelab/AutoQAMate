@@ -8,6 +8,7 @@ const secondaryNavigation = [
     { name: '저장된 테스터 정보', href: '/tools/tester-info/list', component: TesterInfoList },
     { name: '테스터 정보 추가', href: '/tools/tester-info/add', component: AddTesterInfo },
     { name: '테스터 정보 삭제', href: '/tools/tester-info/delete', component: DeleteTesterInfo },
+    { name: '뒤로가기', href: '/tools' }
 ]
 
 function classNames(...classes) {
@@ -20,7 +21,6 @@ function TesterInfo() {
     return (
         <>
             <div className="pb-5 sm:pb-0">
-                <h3 className="text-base font-semibold leading-6 text-gray-900">테스터 정보 관리</h3>
                 <div className="mt-3 sm:mt-4">
                     <div className="hidden sm:block">
                         <nav className="-mb-px flex space-x-8">
